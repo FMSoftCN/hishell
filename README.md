@@ -1,4 +1,15 @@
-#### How to Build and Run
+# HiShell
+
+HiShell is the shell for the HybridOS.
+
+## Table of Contents
+
+- [How to Build ?](#how-to-build)
+
+
+## How to Build
+
+It compiles as part of [HybridOS Device Side]. 
 
 - Build the Application
 
@@ -18,3 +29,6 @@
   # source env.sh
   # ./mginit
   ```
+
+---
+[HybridOS Device Side]: /hybridos/hybridos/tree/master/device-side
