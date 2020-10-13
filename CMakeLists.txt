@@ -52,4 +52,5 @@ add_subdirectory(appagent)
 
 install(FILES "MiniGUI.cfg" DESTINATION ${CMAKE_INSTALL_PREFIX}/libexec/)
 install(FILES "hybridos.cfg" DESTINATION ${CMAKE_INSTALL_PREFIX}/libexec/)
+install(DIRECTORY samples DESTINATION ${CMAKE_INSTALL_PREFIX}/libexec/)
 
