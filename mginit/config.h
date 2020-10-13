@@ -19,7 +19,7 @@
  *
  \verbatim
 
-    This file is part of HybridOS, a developing operating system based on
+    This file is part of hishell, a developing operating system based on
     MiniGUI. HybridOs will support embedded systems and smart IoT devices.
 
     Copyright (C) 2002~2020, Beijing FMSoft Technologies Co., Ltd.
