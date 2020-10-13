@@ -9,14 +9,18 @@ HiShell is the shell for the HybridOS.
 
 ## How to Build
 
-It compiles as part of [HybridOS Device Side]. 
+### Build as part of HybridOS Device Side 
+
+For more information, see [HybridOS Device Side]. 
+
+### Build Alone
 
 - Build the Application
 
   ```bash
   # cd hishell
   # cmake .
-  # maske
+  # make
   ```
 
   The output directory is "hishell\bin". All files the OS depends on,  will be in this folder, executable files, configuration files,  and some bash files are inclusive.
