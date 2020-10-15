@@ -49,7 +49,7 @@
 
 #pragma once
 
-#include <wtf/Optional.h>
+#include <optional>
 #include <string>
 
 #include <minigui/common.h>
@@ -93,7 +93,7 @@ struct ProxySettings {
     std::string excludeHosts;
 };
 
-Optional<Credential> askCredential(HWND, const std::string& realm);
+std::optional<Credential> askCredential(HWND, const std::string& realm);
 bool askProxySettings(HWND, ProxySettings&);
 
 bool askServerTrustEvaluation(HWND, const std::string& pems);
