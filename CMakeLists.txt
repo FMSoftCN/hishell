@@ -53,6 +53,7 @@ add_subdirectory(mginit)
 add_subdirectory(sysmgr)
 add_subdirectory(dybkgnd)
 add_subdirectory(appagent)
+add_subdirectory(ace_appagent)
 
 install(FILES "MiniGUI.cfg" DESTINATION ${CMAKE_INSTALL_PREFIX}/libexec/)
 install(FILES "hybridos.cfg" DESTINATION ${CMAKE_INSTALL_PREFIX}/libexec/)
