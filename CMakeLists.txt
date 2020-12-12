@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-set(CMAKE_INCLUDE_PATH "/home/xue/work/hybridos/device-side/Output/HBD/Root/include")
-set(CMAKE_LIBRARY_PATH "/home/xue/work/hybridos/device-side/Output/HBD/Root/lib")
 
-set(ENV{PKG_CONFIG_PATH}  "/home/xue/work/hybridos/device-side/Output/HBD/Root/lib/pkgconfig")
+set(HYBRIDOS_ROOT_PATH "$ENV{HYBRIDOS_OUTPUT_ROOT}")
+INCLUDE_DIRECTORIES("${HYBRIDOS_ROOT_PATH}/include" "${HYBRIDOS_ROOT_PATH}/usr/include")
+LINK_DIRECTORIES("${HYBRIDOS_ROOT_PATH}/lib" "${HYBRIDOS_ROOT_PATH}/usr/lib")
 
 find_package(MbedTLS REQUIRED)
 find_package(Securec REQUIRED)
@@ -26,8 +26,6 @@ set(HIWEBKIT_LIBRARIES ${HiWebKit_LIBRARIES})
 
 set(MGEFF_LIBRARIES ${mGEff_LIBRARIES})
 set(MGEFF_INCLUDE_DIRS ${mGEff_INCLUDE_DIRS})
-
-link_directories("/home/xue/work/hybridos/device-side/Output/HBD/Root/lib")
 
 # copy the necessary resource files to /bin/res
 file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
