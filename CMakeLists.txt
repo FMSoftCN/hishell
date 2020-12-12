@@ -1,9 +1,15 @@
 cmake_minimum_required(VERSION 3.10)
 
-set(ENV{PKG_CONFIG_PATH}  "${PROJECT_SOURCE_DIR}/../Output/HBD/Root/lib/pkgconfig")
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}")
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+set(CMAKE_INCLUDE_PATH "/home/xue/work/hybridos/device-side/Output/HBD/Root/include")
+set(CMAKE_LIBRARY_PATH "/home/xue/work/hybridos/device-side/Output/HBD/Root/lib")
 
-# get library and include path for minigui and mgeff
+set(ENV{PKG_CONFIG_PATH}  "/home/xue/work/hybridos/device-side/Output/HBD/Root/lib/pkgconfig")
+
+find_package(MbedTLS REQUIRED)
+find_package(Securec REQUIRED)
+find_package(Jerryscript REQUIRED)
+
 find_package(MiniGUI 5.0.2 REQUIRED)
 find_package(mGEff 1.5.0 REQUIRED)
 find_package(GLIB 2.0 REQUIRED)
@@ -16,12 +22,12 @@ set(MINIGUI_LIBRARIES ${MiniGUI_LIBRARIES})
 set(MINIGUI_INCLUDE_DIRS ${MiniGUI_INCLUDE_DIRS})
 
 set(HIWEBKIT_INCLUDE_DIRS ${HiWebKit_INCLUDE_DIRS})
-set(HIWEBKIT__LIBRARIES ${HiWebKit_LIBRARIES})
+set(HIWEBKIT_LIBRARIES ${HiWebKit_LIBRARIES})
 
 set(MGEFF_LIBRARIES ${mGEff_LIBRARIES})
 set(MGEFF_INCLUDE_DIRS ${mGEff_INCLUDE_DIRS})
 
-link_directories("${PROJECT_SOURCE_DIR}/../Output/HBD/Root/lib")
+link_directories("/home/xue/work/hybridos/device-side/Output/HBD/Root/lib")
 
 # copy the necessary resource files to /bin/res
 file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
