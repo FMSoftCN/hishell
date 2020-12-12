@@ -83,7 +83,7 @@ static RsvgStylePair button_color_pair [BUTTON_COUNT];
 static char button_color[BUTTON_COUNT][32];
 static char button_target[BUTTON_COUNT][MAX_TARGET_NAME_LEN];
 static char target_name[MAX_TARGET_NUMBER][MAX_TARGET_NAME_LEN];
-static char ace_bundle_name[MAX_TARGET_NUMBER][MAX_TARGET_NAME_LEN];
+static int type[MAX_TARGET_NUMBER] = {0};
 static char ace_app_path[PATH_MAX] = {0};
 static char ace_font_path[PATH_MAX] = {0};
 static int target_blank_index = -1;
@@ -452,7 +452,6 @@ static LRESULT DockBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
             memset(button_target, 0, sizeof(char) * BUTTON_COUNT * MAX_TARGET_NAME_LEN);
             memset(target_name, 0, sizeof(char) * MAX_TARGET_NUMBER * MAX_TARGET_NAME_LEN);
-            memset(ace_bundle_name, 0, sizeof(char) * MAX_TARGET_NUMBER * MAX_TARGET_NAME_LEN);
 
             GetValueFromEtcFile(config_path, "ace_appagent", "app_path", ace_app_path, PATH_MAX);
             GetValueFromEtcFile(config_path, "ace_appagent", "font_path", ace_font_path, PATH_MAX);
@@ -470,7 +469,7 @@ static LRESULT DockBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                     loadSVGArrow(picture_file, ID_DISPLAY_BUTTON);
                 }
                 GetValueFromEtcFile(config_path, "dock_icon0", "target", button_target[ID_DISPLAY_BUTTON], MAX_TARGET_NAME_LEN);
-                GetValueFromEtcFile(config_path, "dock_icon0", "ace_bundle_name", ace_bundle_name[ID_DISPLAY_BUTTON], MAX_TARGET_NAME_LEN);
+                GetIntValueFromEtcFile(config_path, "dock_icon0", "type", &type[ID_DISPLAY_BUTTON]);
             }
             
             // home
@@ -486,7 +485,7 @@ static LRESULT DockBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                     loadSVGFromFile(picture_file, ID_HOME_BUTTON);
                 }
                 GetValueFromEtcFile(config_path, "dock_icon1", "target", button_target[ID_HOME_BUTTON], MAX_TARGET_NAME_LEN);
-                GetValueFromEtcFile(config_path, "dock_icon1", "ace_bundle_name", ace_bundle_name[ID_HOME_BUTTON], MAX_TARGET_NAME_LEN);
+                GetIntValueFromEtcFile(config_path, "dock_icon1", "type", &type[ID_HOME_BUTTON]);
             }
 
             // toggle
@@ -502,7 +501,7 @@ static LRESULT DockBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                     loadSVGFromFile(picture_file, ID_TOGGLE_BUTTON);
                 }
                 GetValueFromEtcFile(config_path, "dock_icon2", "target", button_target[ID_TOGGLE_BUTTON], MAX_TARGET_NAME_LEN);
-                GetValueFromEtcFile(config_path, "dock_icon2", "ace_bundle_name", ace_bundle_name[ID_TOGGLE_BUTTON], MAX_TARGET_NAME_LEN);
+                GetIntValueFromEtcFile(config_path, "dock_icon2", "type", &type[ID_TOGGLE_BUTTON]);
             }
 
             // setting
@@ -518,7 +517,7 @@ static LRESULT DockBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                     loadSVGFromFile(picture_file, ID_SETTING_BUTTON);
                 }
                 GetValueFromEtcFile(config_path, "dock_icon3", "target", button_target[ID_SETTING_BUTTON], MAX_TARGET_NAME_LEN);
-                GetValueFromEtcFile(config_path, "dock_icon3", "ace_bundle_name", ace_bundle_name[ID_SETTING_BUTTON], MAX_TARGET_NAME_LEN);
+                GetIntValueFromEtcFile(config_path, "dock_icon3", "type", &type[ID_SETTING_BUTTON]);
             }
 
             // about
@@ -534,7 +533,7 @@ static LRESULT DockBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                     loadSVGFromFile(picture_file, ID_ABOUT_BUTTON);
                 }
                 GetValueFromEtcFile(config_path, "dock_icon4", "target", button_target[ID_ABOUT_BUTTON], MAX_TARGET_NAME_LEN);
-                GetValueFromEtcFile(config_path, "dock_icon4", "ace_bundle_name", ace_bundle_name[ID_ABOUT_BUTTON], MAX_TARGET_NAME_LEN);
+                GetIntValueFromEtcFile(config_path, "dock_icon4", "type", &type[ID_ABOUT_BUTTON]);
             }
     
             // shutdown
@@ -550,7 +549,7 @@ static LRESULT DockBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                     loadSVGFromFile(picture_file, ID_SHUTDOWN_BUTTON);
                 }
                 GetValueFromEtcFile(config_path, "dock_icon5", "target", button_target[ID_SHUTDOWN_BUTTON], MAX_TARGET_NAME_LEN);
-                GetValueFromEtcFile(config_path, "dock_icon5", "ace_bundle_name", ace_bundle_name[ID_SHUTDOWN_BUTTON], MAX_TARGET_NAME_LEN);
+                GetIntValueFromEtcFile(config_path, "dock_icon5", "type", &type[ID_SHUTDOWN_BUTTON]);
             }
 
             // get target param
@@ -613,13 +612,13 @@ static LRESULT DockBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                         break;
                     case ID_SETTING_BUTTON:
                         //show_page(hWnd, button_target[ID_SETTING_BUTTON]);
-                        ace_run(ace_bundle_name[ID_SETTING_BUTTON]);
+                        ace_run(button_target[ID_SETTING_BUTTON]);
                         break;
                     case ID_SHUTDOWN_BUTTON:
                         break;
                     case ID_ABOUT_BUTTON:
                         //show_page(hWnd, button_target[ID_ABOUT_BUTTON]);
-                        ace_run(ace_bundle_name[ID_ABOUT_BUTTON]);
+                        ace_run(button_target[ID_ABOUT_BUTTON]);
                         break;
                 }
             }
