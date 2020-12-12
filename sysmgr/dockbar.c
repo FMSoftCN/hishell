@@ -605,20 +605,42 @@ static LRESULT DockBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                         create_animation(hWnd);
                         break;
                     case ID_HOME_BUTTON:
-                        show_page(hWnd, button_target[ID_HOME_BUTTON]);
+                        switch(type[ID_HOME_BUTTON])
+                        {
+                            case 0:
+                                show_page(hWnd, button_target[ID_HOME_BUTTON]);
+                                break;
+                            case 1:
+                                ace_run(button_target[ID_HOME_BUTTON]);
+                                break;
+                        }
                         break;
                     case ID_TOGGLE_BUTTON:
                         toggle_application(hWnd);
                         break;
                     case ID_SETTING_BUTTON:
-                        //show_page(hWnd, button_target[ID_SETTING_BUTTON]);
-                        ace_run(button_target[ID_SETTING_BUTTON]);
+                        switch(type[ID_SETTING_BUTTON])
+                        {
+                            case 0:
+                                show_page(hWnd, button_target[ID_SETTING_BUTTON]);
+                                break;
+                            case 1:
+                                ace_run(button_target[ID_SETTING_BUTTON]);
+                                break;
+                        }
                         break;
                     case ID_SHUTDOWN_BUTTON:
                         break;
                     case ID_ABOUT_BUTTON:
-                        //show_page(hWnd, button_target[ID_ABOUT_BUTTON]);
-                        ace_run(button_target[ID_ABOUT_BUTTON]);
+                        switch(type[ID_ABOUT_BUTTON])
+                        {
+                            case 0:
+                                show_page(hWnd, button_target[ID_ABOUT_BUTTON]);
+                                break;
+                            case 1:
+                                ace_run(button_target[ID_ABOUT_BUTTON]);
+                                break;
+                        }
                         break;
                 }
             }
