@@ -186,8 +186,8 @@ static void paintCloseIcon()
 // This code is copied from complexscripts from mg-sample
 static void draw_title(HDC hdc, RECT rect, const char * text)
 {
-    TEXTRUNS*   textruns;
-    LAYOUT*     layout;
+    TEXTRUNS*   textruns = NULL;
+    LAYOUT*     layout = NULL;
     LAYOUTLINE* line = NULL;
     int header_x = 0;
     int header_y = 0;
@@ -195,8 +195,14 @@ static void draw_title(HDC hdc, RECT rect, const char * text)
     Uchar32* ucs = NULL;
     Uint16* bos = NULL;
 
+
     // create title environment
     left_len_text = strlen(text);
+    if (text == NULL || left_len_text == 0)
+    {
+        return;
+    }
+
     while(left_len_text > 0) 
     {
         int consumed = 0;
