@@ -9,6 +9,7 @@ LINK_DIRECTORIES("${HYBRIDOS_ROOT_PATH}/lib" "${HYBRIDOS_ROOT_PATH}/usr/lib")
 find_package(MbedTLS REQUIRED)
 find_package(Securec REQUIRED)
 find_package(Jerryscript REQUIRED)
+find_package(HiAceJS REQUIRED)
 
 find_package(MiniGUI 5.0.2 REQUIRED)
 find_package(mGEff 1.5.0 REQUIRED)
