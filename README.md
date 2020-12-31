@@ -3,7 +3,6 @@
 hiShell is the app running enviornment (the shell) for HybridOS Device Side.
 
 - [Introduction](#introduction)
-- [How to Build](#how-to-build)
 - [Current Status](#current-status)
 - [TODO List](#todo-list)
 - [Copying](#copying)
