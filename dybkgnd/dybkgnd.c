@@ -148,7 +148,7 @@ int paintWallpaper (HDC hdc, int space)
             start = wp_half_h - bmpTop.bmHeight;;
         }
 
-        SetBrushColor(hdc, RGBA2Pixel(hdc, 0x00, 0x00, 0x0, 0x0));
+        SetBrushColor(hdc, RGBA2Pixel(hdc, 0x00, 0x00, 0x00, 0xFF));
         FillBox(hdc, 0, 0, wp_w, wp_h);
 
         w = bmpTop.bmWidth;
