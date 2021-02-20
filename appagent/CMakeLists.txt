@@ -35,6 +35,7 @@ set(appagent_LIBRARIES
     icui18n
     icuuc
     icudata
+    cairo
     ${GLIB_LIBRARIES}
     ${LIBSOUP_LIBRARIES}
 #    ${GSTREAMER_LIBRARIES}
