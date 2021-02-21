@@ -71,6 +71,8 @@
 #include <minigui/window.h>
 #include <minigui/control.h>
 #include <mgeff/mgeff.h>
+#include <hibus.h>
+#include <librsvg/rsvg.h>
 
 #include "../include/sysconfig.h"
 #include "config.h"
@@ -84,6 +86,14 @@ static int m_direction = DIRECTION_SHOW;        // the direction of animation
 static int m_statusbar_visible_time = 200;      // status bar visible time
 static int m_statusbar_show_time = 750;         // status bar animation show time
 static int m_statusbar_hide_time = 400;         // status bar animation hide time
+
+extern void * thread_hibus(void * arg);
+
+static cairo_t *cr[4];
+static cairo_surface_t *surface[4];
+static RsvgStylePair button_color_pair[4];
+static int wifi_strength = 0;
+static int wifi_icon_index = 0;
 
 // get current time
 static char* mk_time(char* buff)
@@ -272,6 +282,88 @@ static void create_animation(HWND hWnd)
     }
 }
 
+static HDC create_memdc_from_image_surface (cairo_surface_t* image_surface)
+{
+    MYBITMAP my_bmp = {
+        flags: MYBMP_TYPE_RGB | MYBMP_FLOW_DOWN,
+        frames: 1,
+        depth: 32,
+    };
+
+    my_bmp.w = cairo_image_surface_get_width (image_surface);
+    my_bmp.h = cairo_image_surface_get_height (image_surface);
+    my_bmp.pitch = cairo_image_surface_get_stride (image_surface);
+    my_bmp.bits = cairo_image_surface_get_data (image_surface);
+    my_bmp.size = my_bmp.pitch * my_bmp.h;
+
+    return CreateMemDCFromMyBitmap(&my_bmp, NULL);
+}
+
+static void paintWiFiIcon(HDC hdc, int index)
+{
+    float r = SysPixelColor[IDX_COLOR_darkgray].r / 255.0;
+    float g = SysPixelColor[IDX_COLOR_darkgray].g / 255.0;
+    float b = SysPixelColor[IDX_COLOR_darkgray].b / 255.0;
+    float alpha = 0xE0 / 255.0;
+
+    if(surface[index] && cr[index])
+    {
+        HDC csdc = create_memdc_from_image_surface(surface[index]);
+        if (csdc != HDC_SCREEN && csdc != HDC_INVALID)
+        {
+            SetMemDCColorKey(csdc, MEMDC_FLAG_SRCCOLORKEY,
+                    MakeRGB(SysPixelColor[IDX_COLOR_darkgray].r * alpha,
+                        SysPixelColor[IDX_COLOR_darkgray].g * alpha,
+                        SysPixelColor[IDX_COLOR_darkgray].b * alpha));
+            BitBlt(csdc, 0, 0, HEIGHT_STATUSBAR - 4 * MARGIN_STATUS, HEIGHT_STATUSBAR - 4 * MARGIN_STATUS, hdc, g_rcScr.right * 0.618 - TIME_INFO_X - HEIGHT_STATUSBAR + 2 * MARGIN_STATUS, 2 * MARGIN_STATUS, 0);
+        }
+        DeleteMemDC(csdc);
+    }
+    SyncUpdateDC(hdc);
+}
+
+static void loadSVGFromFile(const char* file, int index)
+{
+    RsvgHandle *handle;
+    GError *error = NULL;
+    RsvgDimensionData dimensions;
+    double factor_width = 0.0f;
+    double factor_height = 0.0f;
+
+    // read file from svg file
+    handle = rsvg_handle_new_from_file(file, &error);
+    if(error)
+    {
+        surface[index] = NULL;
+        cr[index] = NULL;
+        return;
+    }
+    rsvg_handle_get_dimensions(handle, &dimensions);
+
+    // create cairo_surface_t and cairo_t for one picture
+    surface[index] = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, HEIGHT_STATUSBAR - 4 * MARGIN_STATUS, HEIGHT_STATUSBAR - 4 * MARGIN_STATUS);
+    cr[index] = cairo_create(surface[index]);
+
+    cairo_save(cr[index]);
+
+    factor_width = (double)(HEIGHT_STATUSBAR - 4 * MARGIN_STATUS) / (double)dimensions.width;
+    factor_height = (double)(HEIGHT_STATUSBAR - 4 * MARGIN_STATUS) / (double)dimensions.height;
+    factor_width = (factor_width > factor_height) ? factor_width : factor_height;
+
+    cairo_scale(cr[index], factor_width, factor_width);
+
+    float r = SysPixelColor[IDX_COLOR_darkgray].r / 255.0;
+    float g = SysPixelColor[IDX_COLOR_darkgray].g / 255.0;
+    float b = SysPixelColor[IDX_COLOR_darkgray].b / 255.0;
+    float alpha = 0xE0 / 255.0;
+    cairo_set_source_rgb (cr[index],  r*alpha, g*alpha, b*alpha);
+    cairo_paint (cr[index]);
+    rsvg_handle_render_cairo_style (handle, cr[index], &button_color_pair[index], 1);
+    cairo_restore (cr[index]);
+
+    g_object_unref (handle);
+}
+
 // the window proc of status bar
 static LRESULT StatusBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -280,7 +372,8 @@ static LRESULT StatusBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM 
     static PLOGFONT font_time;
     char buff [20];
     int length = 0;
-    RECT rect[2] = {{10 * MARGIN_STATUS, MARGIN_STATUS + 3, g_rcScr.right * 0.618 - TIME_INFO_X,  m_StatusBar_Height - MARGIN_STATUS}, {g_rcScr.right * 0.618 - TIME_INFO_X, MARGIN_STATUS, g_rcScr.right * 0.618 - MARGIN_STATUS, m_StatusBar_Height - MARGIN_STATUS}};
+    RECT rect[2] = {{10 * MARGIN_STATUS, MARGIN_STATUS + 3, g_rcScr.right * 0.618 - TIME_INFO_X - HEIGHT_STATUSBAR,  m_StatusBar_Height - MARGIN_STATUS}, \
+                    {g_rcScr.right * 0.618 - TIME_INFO_X, MARGIN_STATUS, g_rcScr.right * 0.618 - 10 * MARGIN_STATUS, m_StatusBar_Height - MARGIN_STATUS}};
     char config_path[MAX_PATH + 1];
     char* etc_value = NULL;
 
@@ -301,7 +394,8 @@ static LRESULT StatusBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM 
             mk_time(buff);
             SelectFont(hdc, font_time);
             DrawText (hdc, buff, strlen(buff), rect + 1, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-
+            
+            paintWiFiIcon(hdc, wifi_icon_index);
             EndPaint (hWnd, hdc);
             return 0;
 
@@ -355,6 +449,46 @@ static LRESULT StatusBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM 
             }
             break;
 
+        case MSG_WIFI_CHANGED:
+            if(wParam == 0)
+            {
+                wifi_icon_index = 0;
+                if(wifi_strength)
+                {
+                    m_direction = DIRECTION_SHOW;
+                    create_animation(hWnd);
+                }
+            }
+            else if(wParam < 33)
+            {
+                wifi_icon_index = 1;
+                if(wifi_strength == 0)
+                {
+                    m_direction = DIRECTION_SHOW;
+                    create_animation(hWnd);
+                }
+            }
+            else if(wParam < 66)
+            {
+                wifi_icon_index = 2;
+                if(wifi_strength == 0)
+                {
+                    m_direction = DIRECTION_SHOW;
+                    create_animation(hWnd);
+                }
+            }
+            else
+            {
+                wifi_icon_index = 3;
+                if(wifi_strength == 0)
+                {
+                    m_direction = DIRECTION_SHOW;
+                    create_animation(hWnd);
+                }
+            }
+            wifi_strength = (int)wParam;
+            break;
+
         case MSG_CREATE:
             if ((etc_value = getenv ("HISHELL_CFG_PATH")))
             {
@@ -379,6 +513,19 @@ static LRESULT StatusBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM 
                         FONT_WEIGHT_BOOK, FONT_SLANT_ROMAN, FONT_FLIP_NIL,
                         FONT_OTHER_AUTOSCALE, FONT_UNDERLINE_NONE, FONT_STRUCKOUT_NONE,
                         m_StatusBar_Height * 0.4, 0);
+
+            // load wifi icon
+            for(int i = 0; i < 4; i++)
+            {
+                button_color_pair[i].name = "color";
+                //button_color_pair[i].value = "#FA9C38";
+                button_color_pair[i].value = "#FFFFFF";
+                button_color_pair[i].important = 0;
+            }
+            loadSVGFromFile("res/wifi-0.svg", 0);
+            loadSVGFromFile("res/wifi-1.svg", 1);
+            loadSVGFromFile("res/wifi-2.svg", 2);
+            loadSVGFromFile("res/wifi-3.svg", 3);
 
             SetTimer(hWnd, ID_TIMER, 100);
             SetTimer(hWnd, ID_SHOW_TIMER, m_statusbar_visible_time);
@@ -421,6 +568,7 @@ HWND create_status_bar (void)
     const WINDOWINFO *pWindowInfo = NULL;
     RequestInfo requestinfo;
     ReplyInfo replyInfo;
+    int ret = 0;
 
     m_StatusBar_Height = GetGDCapability(HDC_SCREEN, GDCAP_DPI);
     m_StatusBar_Height = HEIGHT_STATUSBAR * m_StatusBar_Height / 96;
@@ -469,6 +617,35 @@ HWND create_status_bar (void)
     ClientRequest(&request, &replyInfo, sizeof(ReplyInfo));
     if((replyInfo.id == REQ_SUBMIT_STATUSBAR_ZNODE) && (replyInfo.iData0))
     {
+        // create thread for hiBus
+        pthread_attr_t thread_attr_hibus;           // attribute for hibus thread
+        pthread_t a_thread_hibus;                   // thread id for hibus thread
+
+        ret = pthread_attr_init(&thread_attr_hibus);
+        if(ret != 0)
+        {
+            printf("hibus thread: Create thread atrribute failed.\n");
+            return HWND_INVALID;
+        }
+        else
+        {
+            ret = pthread_attr_setdetachstate(&thread_attr_hibus, PTHREAD_CREATE_DETACHED);
+            if(ret != 0)
+            {
+                printf("hibus thread: Detach thread attribute failed.\n");
+                return HWND_INVALID;
+            }
+            else
+            {
+                ret = pthread_create(&a_thread_hibus, &thread_attr_hibus, thread_hibus, NULL);
+                if(ret != 0)
+                {
+                    printf("hibus thread: Start thread failed.\n");
+                    return HWND_INVALID;
+                }
+            }
+            (void)pthread_attr_destroy(&thread_attr_hibus);
+        }
     }
     else
         return HWND_INVALID;

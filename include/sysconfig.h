@@ -69,6 +69,7 @@
 #define MSG_MAINWINDOW_CHANGE       (MSG_USER + 1)
 #define MSG_DYBKGND_DO_ANIMATION    (MSG_USER + 2)
 #define MSG_BROWSER_SHOW            (MSG_USER + 3)
+#define MSG_WIFI_CHANGED            (MSG_USER + 4)
 
 // Customer Require Id
 #define FIXED_FORMAT_REQID          (MAX_SYS_REQID + 1)

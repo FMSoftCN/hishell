@@ -43,6 +43,10 @@ list(APPEND HISHELL_RES_FILES
     "${PROJECT_SOURCE_DIR}/sysmgr/res/setting.svg"
     "${PROJECT_SOURCE_DIR}/sysmgr/res/shutdown.svg"
     "${PROJECT_SOURCE_DIR}/sysmgr/res/about.svg"
+    "${PROJECT_SOURCE_DIR}/sysmgr/res/wifi-0.svg"
+    "${PROJECT_SOURCE_DIR}/sysmgr/res/wifi-1.svg"
+    "${PROJECT_SOURCE_DIR}/sysmgr/res/wifi-2.svg"
+    "${PROJECT_SOURCE_DIR}/sysmgr/res/wifi-3.svg"
 )
 
 file(COPY ${HISHELL_RES_FILES} DESTINATION ${PROJECT_SOURCE_DIR}/bin/res)
