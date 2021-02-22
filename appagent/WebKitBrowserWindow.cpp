@@ -77,18 +77,18 @@ std::string createString(WKStringRef wkString)
 
 std::string createString(WKURLRef wkURL)
 {
-    WKRetainPtr<WKStringRef> url = adoptWK(WKURLCopyString(wkURL));
-    return createString(url.get());
+    WKStringRef url = WKURLCopyString(wkURL);
+    return createString(url);
 }
 
-WKRetainPtr<WKStringRef> createWKString(std::string str)
+WKStringRef createWKString(std::string str)
 {
-    return adoptWK(WKStringCreateWithUTF8CString(str.c_str()));
+    return WKStringCreateWithUTF8CString(str.c_str());
 }
 
-WKRetainPtr<WKURLRef> createWKURL(std::string url)
+WKURLRef createWKURL(std::string url)
 {
-    return adoptWK(WKURLCreateWithUTF8CString(url.c_str()));
+    return WKURLCreateWithUTF8CString(url.c_str());
 }
 
 WebKitBrowserWindow& toWebKitBrowserWindow(const void *clientInfo)
@@ -100,8 +100,8 @@ WebKitBrowserWindow& toWebKitBrowserWindow(const void *clientInfo)
 // it is WKPageNavigationClientV0 callback
 static void didFinishNavigation(WKPageRef page, WKNavigationRef navigation, WKTypeRef userData, const void* clientInfo)
 {
-    WKRetainPtr<WKStringRef> title = adoptWK(WKPageCopyTitle(page));
-    std::string titleString = createString(title.get()) + " [WebKit]";
+    WKStringRef title = WKPageCopyTitle(page);
+    std::string titleString = createString(title) + " [WebKit]";
     auto& thisWindow = toWebKitBrowserWindow(clientInfo);
     SetWindowText(thisWindow.mainHwnd(), titleString.c_str());
 }
@@ -110,8 +110,8 @@ static void didCommitNavigation(WKPageRef page, WKNavigationRef navigation, WKTy
 {
     auto& thisWindow = toWebKitBrowserWindow(clientInfo);
 
-    WKRetainPtr<WKURLRef> wkurl = adoptWK(WKPageCopyCommittedURL(page));
-    std::string urlString = createString(wkurl.get());
+    WKURLRef wkurl = WKPageCopyCommittedURL(page);
+    std::string urlString = createString(wkurl);
     SetWindowText(thisWindow.mainHwnd(), urlString.c_str());
 }
 
@@ -124,20 +124,20 @@ static void didReceiveAuthenticationChallenge(WKPageRef page, WKAuthenticationCh
 
     if (authenticationScheme == kWKProtectionSpaceAuthenticationSchemeServerTrustEvaluationRequested) {
         if (thisWindow.canTrustServerCertificate(protectionSpace)) {
-            WKRetainPtr<WKStringRef> username = createWKString("accept server trust");
-            WKRetainPtr<WKStringRef> password = createWKString("");
-            WKRetainPtr<WKCredentialRef> wkCredential = adoptWK(WKCredentialCreate(username.get(), password.get(), kWKCredentialPersistenceForSession));
-            WKAuthenticationDecisionListenerUseCredential(decisionListener, wkCredential.get());
+            WKStringRef username = createWKString("accept server trust");
+            WKStringRef password = createWKString("");
+            WKCredentialRef wkCredential = WKCredentialCreate(username, password, kWKCredentialPersistenceForSession);
+            WKAuthenticationDecisionListenerUseCredential(decisionListener, wkCredential);
             return;
         }
     } else {
-        WKRetainPtr<WKStringRef> realm(WKProtectionSpaceCopyRealm(protectionSpace));
+        WKStringRef realm(WKProtectionSpaceCopyRealm(protectionSpace));
 
-        if (auto credential = askCredential(thisWindow.hwnd(), createString(realm.get()))) {
-            WKRetainPtr<WKStringRef> username = createWKString(credential->username);
-            WKRetainPtr<WKStringRef> password = createWKString(credential->password);
-            WKRetainPtr<WKCredentialRef> wkCredential = adoptWK(WKCredentialCreate(username.get(), password.get(), kWKCredentialPersistenceForSession));
-            WKAuthenticationDecisionListenerUseCredential(decisionListener, wkCredential.get());
+        if (auto credential = askCredential(thisWindow.hwnd(), createString(realm))) {
+            WKStringRef username = createWKString(credential->username);
+            WKStringRef password = createWKString(credential->password);
+            WKCredentialRef wkCredential = WKCredentialCreate(username, password, kWKCredentialPersistenceForSession);
+            WKAuthenticationDecisionListenerUseCredential(decisionListener, wkCredential);
             return;
         }
     }
@@ -197,8 +197,8 @@ static WKPageRef createNewPage(WKPageRef page, WKPageConfigurationRef configurat
 
     if(browserWindow)
     {
-        auto page = WKViewGetPage(((WebKitBrowserWindow *)browserWindow)->getView().get());
-//        return WKViewGetPage(((WebKitBrowserWindow *)browserWindow)->getView().get());
+        auto page = WKViewGetPage(((WebKitBrowserWindow *)browserWindow)->getView());
+//        return WKViewGetPage(((WebKitBrowserWindow *)browserWindow)->getView());
         return page;
     }
     else
@@ -214,7 +214,7 @@ static WKPageRef createNewPage(WKPageRef page, WKPageConfigurationRef configurat
         return nullptr;
     ShowWindow(newWindow.hwnd(), SW_SHOW);
     auto& newBrowserWindow = *static_cast<WebKitBrowserWindow*>(newWindow.browserWindow());
-    WKRetainPtr<WKPageRef> newPage = WKViewGetPage(newBrowserWindow.m_view.get());
+    WKPageRef newPage = WKViewGetPage(newBrowserWindow.m_view);
     return newPage.leakRef();
 #endif
     return nullptr;
@@ -222,7 +222,6 @@ static WKPageRef createNewPage(WKPageRef page, WKPageConfigurationRef configurat
 
 void close(WKPageRef page, const void* clientInfo)
 {
-    fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __func__);
     auto& thisWindow = toWebKitBrowserWindow(clientInfo);
     SendMessage(thisWindow.mainHwnd(), MSG_USER_CLOSE_VIEW, 0, (LPARAM)clientInfo);
     DestroyWindow(thisWindow.hwnd());
@@ -411,27 +410,27 @@ static void didSwapWebProcesses(const void* clientInfo)
 */
 
 
-BrowserWindow* WebKitBrowserWindow::create(LINT id, RECT rect, HWND mainWnd, HWND urlBarWnd)
+WebKitBrowserWindow* WebKitBrowserWindow::create(LINT id, RECT rect, HWND mainWnd, HWND urlBarWnd)
 {
-    auto conf = adoptWK(WKPageConfigurationCreate());
+    auto conf = WKPageConfigurationCreate();
 
-    auto prefs = adoptWK(WKPreferencesCreate());
+    auto prefs = WKPreferencesCreate();
 
-    auto pageGroup = adoptWK(WKPageGroupCreateWithIdentifier(createWKString("HbdMiniBrowser").get()));
-    WKPageConfigurationSetPageGroup(conf.get(), pageGroup.get());
-    WKPageGroupSetPreferences(pageGroup.get(), prefs.get());
+    auto pageGroup = WKPageGroupCreateWithIdentifier(createWKString("HbdMiniBrowser"));
+    WKPageConfigurationSetPageGroup(conf, pageGroup);
+    WKPageGroupSetPreferences(pageGroup, prefs);
 
-    WKPreferencesSetMediaCapabilitiesEnabled(prefs.get(), false);
-    WKPreferencesSetDeveloperExtrasEnabled(prefs.get(), true);
-    WKPageConfigurationSetPreferences(conf.get(), prefs.get());
+    WKPreferencesSetMediaCapabilitiesEnabled(prefs, false);
+    WKPreferencesSetDeveloperExtrasEnabled(prefs, true);
+    WKPageConfigurationSetPreferences(conf, prefs);
 
-    auto context =adoptWK(WKContextCreateWithConfiguration(nullptr));
-    WKPageConfigurationSetContext(conf.get(), context.get());
+    auto context =WKContextCreateWithConfiguration(nullptr);
+    WKPageConfigurationSetContext(conf, context);
 
-    return create(id, rect, mainWnd, urlBarWnd, conf.get());
+    return create(id, rect, mainWnd, urlBarWnd, conf);
 }
 
-BrowserWindow* WebKitBrowserWindow::create(LINT id, RECT rect, HWND mainWnd, HWND urlBarWnd, WKPageConfigurationRef conf)
+WebKitBrowserWindow* WebKitBrowserWindow::create(LINT id, RECT rect, HWND mainWnd, HWND urlBarWnd, WKPageConfigurationRef conf)
 {
     return new WebKitBrowserWindow(id, rect,mainWnd, urlBarWnd, conf);
 }
@@ -440,12 +439,11 @@ WebKitBrowserWindow::WebKitBrowserWindow(LINT id, RECT rect, HWND mainWnd, HWND 
     : m_hMainWnd(mainWnd)
     , m_urlBarWnd(urlBarWnd)
 {
-    m_view = adoptWK(WKViewCreateWithConfiguration(rect, mainWnd, id, conf));
-    WKViewSetIsInWindow(m_view.get(), true);
-    // enable / disable touch support
-    WKViewSetTouchEnabled(m_view.get(), true);
+    m_view = WKViewCreateWithConfiguration(rect, mainWnd, id, conf);
+    WKViewSetIsInWindow(m_view, true);
+    WKViewSetTouchEnabled(m_view, true);
 
-    auto page = WKViewGetPage(m_view.get());
+    auto page = WKViewGetPage(m_view);
 
     // it is WKPageNavigationClientV0 callback
     WKPageNavigationClientV0 navigationClient = { };
@@ -530,37 +528,37 @@ LRESULT WebKitBrowserWindow::init()
 
 HWND WebKitBrowserWindow::hwnd()
 {
-    return WKViewGetWindow(m_view.get());
+    return WKViewGetWindow(m_view);
 }
 
 LRESULT WebKitBrowserWindow::loadURL(const char* url)
 {
-    auto page = WKViewGetPage(m_view.get());
-    WKPageLoadURL(page, createWKURL(url).get());
+    auto page = WKViewGetPage(m_view);
+    WKPageLoadURL(page, createWKURL(url));
     return true;
 }
 
 void WebKitBrowserWindow::navigateForward()
 {
-    auto page = WKViewGetPage(m_view.get());
+    auto page = WKViewGetPage(m_view);
     WKPageGoForward(page);
 }
 
 void WebKitBrowserWindow::navigateBackward()
 {
-    auto page = WKViewGetPage(m_view.get());
+    auto page = WKViewGetPage(m_view);
     WKPageGoBack(page);
 }
 
 void WebKitBrowserWindow::navigateStopLoading()
 {
-    auto page = WKViewGetPage(m_view.get());
+    auto page = WKViewGetPage(m_view);
     WKPageStopLoading(page);
 }
 
 void WebKitBrowserWindow::navigateReload()
 {
-    auto page = WKViewGetPage(m_view.get());
+    auto page = WKViewGetPage(m_view);
     WKPageReload(page);
 }
 
@@ -571,13 +569,13 @@ void WebKitBrowserWindow::navigateToHistory(UINT menuID)
 
 double WebKitBrowserWindow::getEstimatedProgress()
 {
-    auto page = WKViewGetPage(m_view.get());
+    auto page = WKViewGetPage(m_view);
     return WKPageGetEstimatedProgress(page);
 }
 
 void WebKitBrowserWindow::setPreference(UINT menuID, bool enable)
 {
-    auto page = WKViewGetPage(m_view.get());
+    auto page = WKViewGetPage(m_view);
     auto pgroup = WKPageGetPageGroup(page);
     auto pref = WKPageGroupGetPreferences(pgroup);
     switch (menuID) {
@@ -597,7 +595,7 @@ void WebKitBrowserWindow::print()
 
 void WebKitBrowserWindow::launchInspector()
 {
-    auto page = WKViewGetPage(m_view.get());
+    auto page = WKViewGetPage(m_view);
     auto inspector = WKPageGetInspector(page);
     WKInspectorShow(inspector);
 }
@@ -610,16 +608,16 @@ void WebKitBrowserWindow::openProxySettings()
 
 void WebKitBrowserWindow::setUserAgent(const char* agent)
 {
-    auto page = WKViewGetPage(m_view.get());
+    auto page = WKViewGetPage(m_view);
     auto ua = createWKString(agent);
-    WKPageSetCustomUserAgent(page, ua.get());
+    WKPageSetCustomUserAgent(page, ua);
 }
 
 std::string WebKitBrowserWindow::userAgent()
 {
-    auto page = WKViewGetPage(m_view.get());
-    auto ua = adoptWK(WKPageCopyUserAgent(page));
-    return createString(ua.get()).c_str();
+    auto page = WKViewGetPage(m_view);
+    auto ua = WKPageCopyUserAgent(page);
+    return createString(ua).c_str();
 }
 
 void WebKitBrowserWindow::showLayerTree()
@@ -635,20 +633,20 @@ void WebKitBrowserWindow::updateStatistics(HWND hDlg)
 
 void WebKitBrowserWindow::resetZoom()
 {
-    auto page = WKViewGetPage(m_view.get());
+    auto page = WKViewGetPage(m_view);
     WKPageSetPageZoomFactor(page, 1.0);
 }
 
 void WebKitBrowserWindow::zoomIn()
 {
-    auto page = WKViewGetPage(m_view.get());
+    auto page = WKViewGetPage(m_view);
     double s = WKPageGetPageZoomFactor(page);
     WKPageSetPageZoomFactor(page, s * 1.25);
 }
 
 void WebKitBrowserWindow::zoomOut()
 {
-    auto page = WKViewGetPage(m_view.get());
+    auto page = WKViewGetPage(m_view);
     double s = WKPageGetPageZoomFactor(page);
     WKPageSetPageZoomFactor(page, s * 0.8);
 }
