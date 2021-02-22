@@ -91,7 +91,7 @@ static int wifi_connect_handler(hibus_conn* conn, const char* from_endpoint, con
     hibus_json *jo_tmp = NULL;
     int error_code = 0;
 
-printf("========================================connect, %s\n", ret_value);
+//printf("========================================connect, %s\n", ret_value);
     jo = hibus_json_object_from_string(ret_value, strlen(ret_value), 10);
         return 0;
 
@@ -124,7 +124,7 @@ static void wifi_signal_changed_handler(hibus_conn* conn, const char* from_endpo
     int strength = 0;
     const char * ssid = NULL;
 
-    printf("========================================get signal changed, %s\n", bubble_data);
+//    printf("========================================get signal changed, %s\n", bubble_data);
 
     jo = hibus_json_object_from_string(bubble_data, strlen(bubble_data), 10);
     if(jo == NULL)
@@ -169,7 +169,7 @@ static void wifi_hotspot_changed_handler(hibus_conn* conn, const char* from_endp
     char * endpoint = NULL;
     char command[512];
 
-printf("========================================get hotspot changed, %s\n", bubble_data);
+// printf("========================================get hotspot changed, %s\n", bubble_data);
 
     jo = hibus_json_object_from_string(bubble_data, strlen(bubble_data), 10);
     if(jo == NULL)
@@ -198,7 +198,7 @@ printf("========================================get hotspot changed, %s\n", bubb
                 bssid = json_object_get_string(jo_tmp);
                 if(strncasecmp(bssid, connect_bssid, strlen(bssid)) == 0)
                 {
-                    printf("===============================================================missed, %s\n", bssid);
+//                    printf("===============================================================missed, %s\n", bssid);
                     if(m_hStatusBar)
                         PostMessage(m_hStatusBar, MSG_WIFI_CHANGED, 0, 0);
                     break;
@@ -226,7 +226,7 @@ printf("========================================get hotspot changed, %s\n", bubb
                 bssid = json_object_get_string(jo_tmp);
                 if(strncasecmp(bssid, wifi_ssid, strlen(wifi_ssid)) == 0)
                 {
-                    printf("===============================================================find ssid, %s\n", bssid);
+//                    printf("===============================================================find ssid, %s\n", bssid);
                     if(json_object_object_get_ex(obj, "bssid", &jo_tmp) == 0)
                         continue;
                     else
@@ -234,7 +234,7 @@ printf("========================================get hotspot changed, %s\n", bubb
                         bssid = json_object_get_string(jo_tmp);
                         memset(connect_bssid, 0, 128);
                         sprintf(connect_bssid, "%s", bssid);
-                        printf("===============================================================find bssid, %s\n", bssid);
+//                        printf("===============================================================find bssid, %s\n", bssid);
                     }
 
                     endpoint = hibus_assemble_endpoint_name_alloc(HIBUS_LOCALHOST, APP_NAME_SETTINGS, RUNNER_NAME_INETD);
@@ -262,7 +262,7 @@ static int wifi_get_network_info_handler(hibus_conn* conn, const char* from_endp
     char * endpoint = NULL;
     char command[512];
 
-printf("======================================== wifi_get_network_info_handler %s\n", ret_value);
+//printf("======================================== wifi_get_network_info_handler %s\n", ret_value);
     jo = hibus_json_object_from_string(ret_value, strlen(ret_value), 10);
     if(jo == NULL)
         return 0;
@@ -325,7 +325,7 @@ static int wifi_scan_hotspots_handler(hibus_conn* conn, const char* from_endpoin
     const char * bssid = NULL;
     int i = 0;
 
-printf("========================================wifi_scan_hotspots_handler %s\n", ret_value);
+//printf("========================================wifi_scan_hotspots_handler %s\n", ret_value);
     endpoint = hibus_assemble_endpoint_name_alloc(HIBUS_LOCALHOST, APP_NAME_SETTINGS, RUNNER_NAME_INETD);
     hibus_subscribe_event(conn, endpoint, WIFISIGNALSTRENGTHCHANGED, wifi_signal_changed_handler);
     hibus_subscribe_event(conn, endpoint, WIFIHOTSPOTSCHANGED, wifi_hotspot_changed_handler);
@@ -359,7 +359,7 @@ printf("========================================wifi_scan_hotspots_handler %s\n"
                 bssid = json_object_get_string(jo_tmp);
                 if(strncasecmp(bssid, wifi_ssid, strlen(bssid)) == 0)
                 {
-printf("=============================================================================================== ssid is %s\n", bssid);
+//printf("=============================================================================================== ssid is %s\n", bssid);
                     if(json_object_object_get_ex(obj, "bssid", &jo_tmp) == 0)
                         continue;
                     else
@@ -369,7 +369,7 @@ printf("========================================================================
                         {
                             memset(connect_bssid, 0, 128);
                             sprintf(connect_bssid, "%s", bssid);
-printf("=============================================================================================== bssid is %s\n", bssid);
+//printf("=============================================================================================== bssid is %s\n", bssid);
                         }
                         break;
                     }
@@ -391,7 +391,7 @@ static int wifi_open_device_handler(hibus_conn* conn, const char* from_endpoint,
 {
     char * endpoint = NULL;
 
-    printf("========================================open device %s\n", ret_value);
+//    printf("========================================open device %s\n", ret_value);
     endpoint = hibus_assemble_endpoint_name_alloc(HIBUS_LOCALHOST, APP_NAME_SETTINGS, RUNNER_NAME_INETD);
     hibus_call_procedure(conn, endpoint, METHOD_WIFI_START_SCAN, command_device, 1000, wifi_scan_hotspots_handler);
     free(endpoint);
@@ -410,7 +410,7 @@ static int wifi_get_devices_info_handler(hibus_conn* conn, const char* from_endp
     int i = 0;
     char * endpoint = NULL;
 
-    printf("========================================get device, %s\n", ret_value);
+//    printf("========================================get device, %s\n", ret_value);
     jo = hibus_json_object_from_string(ret_value, strlen(ret_value), 10);
     if(jo == NULL)
         return 0;
@@ -447,7 +447,7 @@ static int wifi_get_devices_info_handler(hibus_conn* conn, const char* from_endp
                         {
                             memset(device_name, 0, 64);
                             sprintf(device_name, "%s", bssid);
-                            printf("================================================= find bssid = %s\n", device_name);
+//                            printf("================================================= find bssid = %s\n", device_name);
 
                             memset(command_device, 0, 128);
                             sprintf(command_device, "{\"device\":\"%s\"}", device_name);
