@@ -2,7 +2,12 @@ cmake_minimum_required(VERSION 3.10)
 project(mginit)
 aux_source_directory(. DIR_SRCS)
 add_executable(mginit ${DIR_SRCS})
+if(PLATFORM_PX30)
+include_directories(${MINIGUI_INCLUDE_DIRS} ${MGEFF_INCLUDE_DIRS} ${GLIB_INCLUDE_DIRS} ${LIBRSVG_INCLUDE_DIR})
+else()
 include_directories(${MINIGUI_INCLUDE_DIRS} ${MGEFF_INCLUDE_DIRS} ${GLIB_INCLUDE_DIRS} ${LIBRSVG_INCLUDE_DIR} ${Cairo_INCLUDE_DIRS})
+endif()
+
 target_link_libraries(mginit gobject-2.0 cairo)
 target_link_libraries(mginit ${MINIGUI_LIBRARIES} ${MGEFF_LIBRARIES} ${LIBRSVG_LIBRARIES} ${GLIB_LIBRARIES})
 

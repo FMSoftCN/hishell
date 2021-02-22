@@ -375,6 +375,9 @@ static LRESULT StatusBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 #ifdef PLATFORM_R818
     RECT rect[2] = {{10 * MARGIN_STATUS, MARGIN_STATUS + 8, g_rcScr.right * 0.618 - TIME_INFO_X - HEIGHT_STATUSBAR,  m_StatusBar_Height - MARGIN_STATUS}, \
                     {g_rcScr.right * 0.618 - TIME_INFO_X, MARGIN_STATUS, g_rcScr.right * 0.618 - 10 * MARGIN_STATUS, m_StatusBar_Height - MARGIN_STATUS}};
+#elif PLATFORM_PX30
+    RECT rect[2] = {{10 * MARGIN_STATUS, MARGIN_STATUS + 10, g_rcScr.right * 0.618 - TIME_INFO_X - HEIGHT_STATUSBAR,  m_StatusBar_Height - MARGIN_STATUS}, \
+                    {g_rcScr.right * 0.618 - TIME_INFO_X, MARGIN_STATUS, g_rcScr.right * 0.618 - 10 * MARGIN_STATUS, m_StatusBar_Height - MARGIN_STATUS}};
 #else
     RECT rect[2] = {{10 * MARGIN_STATUS, MARGIN_STATUS + 3, g_rcScr.right * 0.618 - TIME_INFO_X - HEIGHT_STATUSBAR,  m_StatusBar_Height - MARGIN_STATUS}, \
                     {g_rcScr.right * 0.618 - TIME_INFO_X, MARGIN_STATUS, g_rcScr.right * 0.618 - 10 * MARGIN_STATUS, m_StatusBar_Height - MARGIN_STATUS}};

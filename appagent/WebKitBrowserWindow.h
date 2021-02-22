@@ -52,6 +52,7 @@
 #include "BrowserWindow.h"
 #include "Common.h"
 
+#include <WebKit/WKRetainPtr.h>
 #include <WebKit/WebKit2_C.h>
 #include <webkit2/webkit2.h>
 
@@ -59,14 +60,14 @@
 
 class WebKitBrowserWindow : public BrowserWindow {
 public:
-    static WebKitBrowserWindow* create(LINT id, RECT rect, HWND mainWnd, HWND urlBarWnd);
-    static WebKitBrowserWindow* create(LINT id, RECT rect, HWND mainWnd, HWND urlBarWnd, WKPageConfigurationRef conf);
+    static BrowserWindow* create(LINT id, RECT rect, HWND mainWnd, HWND urlBarWnd);
+    static BrowserWindow* create(LINT id, RECT rect, HWND mainWnd, HWND urlBarWnd, WKPageConfigurationRef conf);
 
     HWND hwnd() override;
     HWND mainHwnd() { return m_hMainWnd; }
     bool canTrustServerCertificate(WKProtectionSpaceRef);
     double getEstimatedProgress() override;
-    WKViewRef getView()    { return m_view; }
+    WKRetainPtr<WKViewRef> getView()    { return m_view; }
     WKPageConfigurationRef getPageConfiguration() { return m_pageConfiguration; }
 
 private:
@@ -98,10 +99,49 @@ private:
 
     void updateProxySettings();
 
-    WKViewRef m_view;
+    WKRetainPtr<WKViewRef> m_view;
     HWND m_hMainWnd { nullptr };
     HWND m_urlBarWnd { nullptr };
     ProxySettings m_proxy { };
     std::unordered_map<std::string, std::string> m_acceptedServerTrustCerts;
     WKPageConfigurationRef m_pageConfiguration;
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
