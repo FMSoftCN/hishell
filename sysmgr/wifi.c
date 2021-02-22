@@ -91,7 +91,7 @@ static int wifi_connect_handler(hibus_conn* conn, const char* from_endpoint, con
     hibus_json *jo_tmp = NULL;
     int error_code = 0;
 
-printf("========================================connect, %s\n", ret_value);
+//printf("========================================connect, %s\n", ret_value);
     jo = hibus_json_object_from_string(ret_value, strlen(ret_value), 10);
         return 0;
 
@@ -124,7 +124,7 @@ static void wifi_signal_changed_handler(hibus_conn* conn, const char* from_endpo
     int strength = 0;
     const char * ssid = NULL;
 
-    printf("========================================get signal changed, %s\n", bubble_data);
+//    printf("========================================get signal changed, %s\n", bubble_data);
 
     jo = hibus_json_object_from_string(bubble_data, strlen(bubble_data), 10);
     if(jo == NULL)
@@ -169,7 +169,7 @@ static void wifi_hotspot_changed_handler(hibus_conn* conn, const char* from_endp
     char * endpoint = NULL;
     char command[512];
 
-printf("========================================get hotspot changed, %s\n", bubble_data);
+//printf("========================================get hotspot changed, %s\n", bubble_data);
 
     jo = hibus_json_object_from_string(bubble_data, strlen(bubble_data), 10);
     if(jo == NULL)
@@ -262,6 +262,7 @@ static int wifi_get_network_info_handler(hibus_conn* conn, const char* from_endp
     char * endpoint = NULL;
     char command[512];
 
+//printf("======================================== wifi_get_network_info_handler %s\n", ret_value);
     jo = hibus_json_object_from_string(ret_value, strlen(ret_value), 10);
     if(jo == NULL)
         return 0;
@@ -289,8 +290,14 @@ static int wifi_get_network_info_handler(hibus_conn* conn, const char* from_endp
     }
     else
     {
+        if(json_object_object_get_ex(jo, "data", &jo_tmp) == 0)
+        {
+            if(jo)
+                json_object_put (jo);
+            return 0;
+        }
         // get signal strength
-        if(json_object_object_get_ex(jo, "signalStrength", &jo_tmp) == 0)
+        if(json_object_object_get_ex(jo_tmp, "signalStrength", &jo_tmp) == 0)
         {
             if(jo)
                 json_object_put (jo);
@@ -318,7 +325,7 @@ static int wifi_scan_hotspots_handler(hibus_conn* conn, const char* from_endpoin
     const char * bssid = NULL;
     int i = 0;
 
-printf("========================================wifi_scan_hotspots_handler %s\n", ret_value);
+//printf("========================================wifi_scan_hotspots_handler %s\n", ret_value);
     endpoint = hibus_assemble_endpoint_name_alloc(HIBUS_LOCALHOST, APP_NAME_SETTINGS, RUNNER_NAME_INETD);
     hibus_subscribe_event(conn, endpoint, WIFISIGNALSTRENGTHCHANGED, wifi_signal_changed_handler);
     hibus_subscribe_event(conn, endpoint, WIFIHOTSPOTSCHANGED, wifi_hotspot_changed_handler);
@@ -384,7 +391,7 @@ static int wifi_open_device_handler(hibus_conn* conn, const char* from_endpoint,
 {
     char * endpoint = NULL;
 
-    printf("========================================open device %s\n", ret_value);
+//    printf("========================================open device %s\n", ret_value);
     endpoint = hibus_assemble_endpoint_name_alloc(HIBUS_LOCALHOST, APP_NAME_SETTINGS, RUNNER_NAME_INETD);
     hibus_call_procedure(conn, endpoint, METHOD_WIFI_START_SCAN, command_device, 1000, wifi_scan_hotspots_handler);
     free(endpoint);
@@ -403,7 +410,7 @@ static int wifi_get_devices_info_handler(hibus_conn* conn, const char* from_endp
     int i = 0;
     char * endpoint = NULL;
 
-    printf("========================================get device, %s\n", ret_value);
+//    printf("========================================get device, %s\n", ret_value);
     jo = hibus_json_object_from_string(ret_value, strlen(ret_value), 10);
     if(jo == NULL)
         return 0;

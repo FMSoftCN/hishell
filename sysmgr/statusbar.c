@@ -393,7 +393,7 @@ static LRESULT StatusBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 
             mk_time(buff);
             SelectFont(hdc, font_time);
-            DrawText (hdc, buff, strlen(buff), rect + 1, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+            DrawText (hdc, buff, strlen(buff), rect + 1, DT_RIGHT | DT_VCENTER | DT_SINGLELINE);
             
             paintWiFiIcon(hdc, wifi_icon_index);
             EndPaint (hWnd, hdc);
