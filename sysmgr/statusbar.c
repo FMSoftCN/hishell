@@ -372,8 +372,13 @@ static LRESULT StatusBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM 
     static PLOGFONT font_time;
     char buff [20];
     int length = 0;
+#ifdef PLATFORM_R818
+    RECT rect[2] = {{10 * MARGIN_STATUS, MARGIN_STATUS + 8, g_rcScr.right * 0.618 - TIME_INFO_X - HEIGHT_STATUSBAR,  m_StatusBar_Height - MARGIN_STATUS}, \
+                    {g_rcScr.right * 0.618 - TIME_INFO_X, MARGIN_STATUS, g_rcScr.right * 0.618 - 10 * MARGIN_STATUS, m_StatusBar_Height - MARGIN_STATUS}};
+#else
     RECT rect[2] = {{10 * MARGIN_STATUS, MARGIN_STATUS + 3, g_rcScr.right * 0.618 - TIME_INFO_X - HEIGHT_STATUSBAR,  m_StatusBar_Height - MARGIN_STATUS}, \
                     {g_rcScr.right * 0.618 - TIME_INFO_X, MARGIN_STATUS, g_rcScr.right * 0.618 - 10 * MARGIN_STATUS, m_StatusBar_Height - MARGIN_STATUS}};
+#endif
     char config_path[MAX_PATH + 1];
     char* etc_value = NULL;
 

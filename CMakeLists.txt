@@ -54,6 +54,13 @@ file(COPY "MiniGUI.cfg" DESTINATION ${PROJECT_SOURCE_DIR}/bin/)
 file(COPY "hybridos.cfg" DESTINATION ${PROJECT_SOURCE_DIR}/bin/)
 file(COPY "env.sh" DESTINATION ${PROJECT_SOURCE_DIR}/bin/)
 
+OPTION(PLATFORM_R818 "Compiled for platform R818" OFF)
+
+if(PLATFORM_R818)
+  MESSAGE(STATUS "Compiled for platform R818")
+  ADD_DEFINITIONS(-DPLATFORM_R818)
+endif()
+
 # set output path
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
