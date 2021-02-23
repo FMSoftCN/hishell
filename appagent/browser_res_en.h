@@ -48,7 +48,7 @@
  */
 
 
-#define HL_ST_CAP       "Hello World!"
+#define HL_ST_CAP       "HybridOS Demo"
 #define HL_ST_NOMES     "No messageso far."
 #define HL_ST_TIMER     "Timer expired, current tick count: %p."
 #define HL_ST_LBD       "The left button pressed."

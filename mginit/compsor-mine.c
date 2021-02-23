@@ -526,6 +526,9 @@ static void toggle_draw(int zidx, HDC hsdc, int sx, int sy, int sw, int sh, HDC 
                         m_fallback_toggle_ctxt.main_window_number ++;
                     }
                 }
+                if(m_fallback_toggle_ctxt.main_window_number == MAX_TOGGLE_APP)
+                    break;
+
                 znode_index = ServerGetNextZNode(NULL, znode_index, &cur_clientId);
             }
 

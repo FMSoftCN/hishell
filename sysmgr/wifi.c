@@ -371,6 +371,16 @@ static int wifi_scan_hotspots_handler(hibus_conn* conn, const char* from_endpoin
                             sprintf(connect_bssid, "%s", bssid);
 //printf("=============================================================================================== bssid is %s\n", bssid);
                         }
+                    }
+
+                    if(json_object_object_get_ex(obj, "signalStrength", &jo_tmp) == 0)
+                        continue;
+                    else
+                    {
+                        int strength = json_object_get_int(jo_tmp);
+                        // send signal info
+                        if(m_hStatusBar)
+                            PostMessage(m_hStatusBar, MSG_WIFI_CHANGED, strength, 0);
                         break;
                     }
                 }

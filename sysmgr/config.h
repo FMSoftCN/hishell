@@ -76,12 +76,21 @@
 #define DOCK_ICON_HEIGHT    42              // the height of icon in dock bar
 
 // control ID in dock bar
+/*
 #define BUTTON_COUNT        6               // the number of button on the dock bar
 #define ID_DISPLAY_BUTTON   0               // show and hide button
 #define ID_HOME_BUTTON      1               // home button
 #define ID_TOGGLE_BUTTON    2               // toggle apps
 #define ID_SETTING_BUTTON   3               // system settings
 #define ID_ABOUT_BUTTON     4               // about button, navigate to hybridos.com
+#define ID_SHUTDOWN_BUTTON  5               // shutdown the device
+*/
+#define BUTTON_COUNT        6               // the number of button on the dock bar
+#define ID_DISPLAY_BUTTON   0               // show and hide button
+#define ID_HOME_BUTTON      1               // home button
+#define ID_SETTING_BUTTON   2               // system settings
+#define ID_ABOUT_BUTTON     3               // about button, navigate to hybridos.com
+#define ID_TOGGLE_BUTTON    4               // toggle apps
 #define ID_SHUTDOWN_BUTTON  5               // shutdown the device
 
 // timer
