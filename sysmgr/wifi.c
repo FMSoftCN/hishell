@@ -305,6 +305,7 @@ static int wifi_get_network_info_handler(hibus_conn* conn, const char* from_endp
         }
 
         strength = json_object_get_int(jo_tmp); 
+
         if(m_hStatusBar)
             PostMessage(m_hStatusBar, MSG_WIFI_CHANGED, strength, 0);
     }
@@ -373,11 +374,32 @@ static int wifi_scan_hotspots_handler(hibus_conn* conn, const char* from_endpoin
                         }
                     }
 
+                    if(json_object_object_get_ex(obj, "isConnected", &jo_tmp) == 0)
+                        continue;
+                    else
+                    {
+                        bool connect = json_object_get_boolean(jo_tmp);
+                        // send signal info
+                        if(!connect)
+                        {
+                            char command[512];
+                            memset(command, 0, 512);
+                            endpoint = hibus_assemble_endpoint_name_alloc(HIBUS_LOCALHOST, APP_NAME_SETTINGS, RUNNER_NAME_INETD);
+                            memset(command, 0, 512);
+                            sprintf(command, "{\"device\":\"%s\", \"ssid\":\"%s\", \"password\":\"%s\"}", device_name, wifi_ssid, wifi_password);
+                            hibus_call_procedure(conn, endpoint, METHOD_WIFI_CONNECT_AP, command, 1000, wifi_connect_handler);
+                            free(endpoint);
+//printf("=============================================================================================== connect %s ========================================\n", wifi_ssid);
+                            break;
+                        }
+                    }
+
                     if(json_object_object_get_ex(obj, "signalStrength", &jo_tmp) == 0)
                         continue;
                     else
                     {
                         int strength = json_object_get_int(jo_tmp);
+//printf("=============================================================================================== signal is %d\n", strength);
                         // send signal info
                         if(m_hStatusBar)
                             PostMessage(m_hStatusBar, MSG_WIFI_CHANGED, strength, 0);
@@ -523,7 +545,6 @@ void * thread_hibus(void * arg)
     
     while(!wpa_IsRun())
         sleep(2);
-printf("======================================================= find wpa_supplicant\n");
 
     // get the default ssid and password
     if ((etc_value = getenv ("HISHELL_CFG_PATH")))
@@ -538,6 +559,7 @@ printf("======================================================= find wpa_supplic
         sprintf(config_path, "%s", SYSTEM_CONFIG_FILE);
     GetValueFromEtcFile(config_path, "wifi_test", "ssid", wifi_ssid, 128);
     GetValueFromEtcFile(config_path, "wifi_test", "password", wifi_password, 64);
+printf("======================================================= find wpa_supplicant, %s, %s\n", wifi_ssid, wifi_password);
 
     // connect to hibus server
     fd_socket = hibus_connect_via_unix_socket(SOCKET_PATH, AGENT_NAME, AGENT_RUNNER_NAME, &hibus_context);
