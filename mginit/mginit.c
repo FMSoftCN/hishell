@@ -379,7 +379,7 @@ int MiniGUIMain (int args, const char* arg[])
     }
 
     // start system config process
-    m_SysConfig.iSystemConfigPid = exec_app("sysmgr");
+    m_SysConfig.iSystemConfigPid = exec_app("appagent");
     if(m_SysConfig.iSystemConfigPid < 0)
     {
         return 3;
@@ -393,7 +393,7 @@ int MiniGUIMain (int args, const char* arg[])
     }
 
     // start browser process
-    m_SysConfig.iBrowserPid = exec_app("appagent");
+    m_SysConfig.iBrowserPid = exec_app("hiweb");
     if(m_SysConfig.iBrowserPid < 0)
     {
         return 3;

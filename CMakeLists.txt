@@ -51,16 +51,16 @@ list(APPEND HISHELL_RES_FILES
     "${PROJECT_SOURCE_DIR}/dybkgnd/res/wallpaper-top.jpg"
 #    "${PROJECT_SOURCE_DIR}/dybkgnd/res/home.svg"
 #    "${PROJECT_SOURCE_DIR}/dybkgnd/res/arrow.svg"
-    "${PROJECT_SOURCE_DIR}/sysmgr/res/arrow.svg"
-    "${PROJECT_SOURCE_DIR}/sysmgr/res/home.svg"
-    "${PROJECT_SOURCE_DIR}/sysmgr/res/toggle.svg"
-    "${PROJECT_SOURCE_DIR}/sysmgr/res/setting.svg"
-    "${PROJECT_SOURCE_DIR}/sysmgr/res/shutdown.svg"
-    "${PROJECT_SOURCE_DIR}/sysmgr/res/about.svg"
-    "${PROJECT_SOURCE_DIR}/sysmgr/res/wifi-0.svg"
-    "${PROJECT_SOURCE_DIR}/sysmgr/res/wifi-1.svg"
-    "${PROJECT_SOURCE_DIR}/sysmgr/res/wifi-2.svg"
-    "${PROJECT_SOURCE_DIR}/sysmgr/res/wifi-3.svg"
+    "${PROJECT_SOURCE_DIR}/appagent/res/arrow.svg"
+    "${PROJECT_SOURCE_DIR}/appagent/res/home.svg"
+    "${PROJECT_SOURCE_DIR}/appagent/res/toggle.svg"
+    "${PROJECT_SOURCE_DIR}/appagent/res/setting.svg"
+    "${PROJECT_SOURCE_DIR}/appagent/res/shutdown.svg"
+    "${PROJECT_SOURCE_DIR}/appagent/res/about.svg"
+    "${PROJECT_SOURCE_DIR}/appagent/res/wifi-0.svg"
+    "${PROJECT_SOURCE_DIR}/appagent/res/wifi-1.svg"
+    "${PROJECT_SOURCE_DIR}/appagent/res/wifi-2.svg"
+    "${PROJECT_SOURCE_DIR}/appagent/res/wifi-3.svg"
 )
 
 file(COPY ${HISHELL_RES_FILES} DESTINATION ${PROJECT_SOURCE_DIR}/bin/res)
@@ -73,10 +73,10 @@ SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 # set sub-directory
 add_subdirectory(mginit)
-add_subdirectory(sysmgr)
-add_subdirectory(dybkgnd)
 add_subdirectory(appagent)
-add_subdirectory(ace_appagent)
+add_subdirectory(dybkgnd)
+add_subdirectory(hiweb)
+add_subdirectory(hijs)
 
 install(FILES "MiniGUI.cfg" DESTINATION ${CMAKE_INSTALL_PREFIX}/libexec/)
 install(FILES "hybridos.cfg" DESTINATION ${CMAKE_INSTALL_PREFIX}/libexec/)
