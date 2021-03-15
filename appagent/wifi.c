@@ -93,6 +93,7 @@ static int wifi_connect_handler(hibus_conn* conn, const char* from_endpoint, con
 
 //printf("========================================connect, %s\n", ret_value);
     jo = hibus_json_object_from_string(ret_value, strlen(ret_value), 10);
+    if(jo == NULL)
         return 0;
 
     // get error code
