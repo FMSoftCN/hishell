@@ -72,7 +72,7 @@
 #include <minigui/control.h>
 #include <mgeff/mgeff.h>
 #include <hibus.h>
-#include <librsvg/rsvg.h>
+#include <hisvg.h>
 
 #include "../include/sysconfig.h"
 #include "config.h"
@@ -91,7 +91,7 @@ extern void * thread_hibus(void * arg);
 
 static cairo_t *cr[4];
 static cairo_surface_t *surface[4];
-static RsvgStylePair button_color_pair[4];
+static char button_color_style[BUTTON_COUNT][64];
 static int wifi_strength = 0;
 static int wifi_icon_index = 0;
 
@@ -324,21 +324,19 @@ static void paintWiFiIcon(HDC hdc, int index)
 
 static void loadSVGFromFile(const char* file, int index)
 {
-    RsvgHandle *handle;
+    HiSVGHandle *handle;
     GError *error = NULL;
-    RsvgDimensionData dimensions;
     double factor_width = 0.0f;
     double factor_height = 0.0f;
 
     // read file from svg file
-    handle = rsvg_handle_new_from_file(file, &error);
+    handle = hisvg_handle_new_from_file(file, &error);
     if(error)
     {
         surface[index] = NULL;
         cr[index] = NULL;
         return;
     }
-    rsvg_handle_get_dimensions(handle, &dimensions);
 
     // create cairo_surface_t and cairo_t for one picture
     surface[index] = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, HEIGHT_STATUSBAR - 4 * MARGIN_STATUS, HEIGHT_STATUSBAR - 4 * MARGIN_STATUS);
@@ -346,11 +344,11 @@ static void loadSVGFromFile(const char* file, int index)
 
     cairo_save(cr[index]);
 
-    factor_width = (double)(HEIGHT_STATUSBAR - 4 * MARGIN_STATUS) / (double)dimensions.width;
-    factor_height = (double)(HEIGHT_STATUSBAR - 4 * MARGIN_STATUS) / (double)dimensions.height;
-    factor_width = (factor_width > factor_height) ? factor_width : factor_height;
-
-    cairo_scale(cr[index], factor_width, factor_width);
+    HiSVGRect vbox;
+    vbox.x = 0;
+    vbox.y = 0;
+    vbox.width = HEIGHT_STATUSBAR - 4 * MARGIN_STATUS;
+    vbox.height = HEIGHT_STATUSBAR - 4 * MARGIN_STATUS;
 
     float r = SysPixelColor[IDX_COLOR_darkgray].r / 255.0;
     float g = SysPixelColor[IDX_COLOR_darkgray].g / 255.0;
@@ -358,10 +356,11 @@ static void loadSVGFromFile(const char* file, int index)
     float alpha = 0xE0 / 255.0;
     cairo_set_source_rgb (cr[index],  r*alpha, g*alpha, b*alpha);
     cairo_paint (cr[index]);
-    rsvg_handle_render_cairo_style (handle, cr[index], &button_color_pair[index], 1);
+    hisvg_handle_set_stylesheet (handle, NULL, button_color_style[index], strlen(button_color_style[index]), NULL);
+    hisvg_handle_render_cairo (handle, cr[index], &vbox, NULL, NULL);
     cairo_restore (cr[index]);
 
-    g_object_unref (handle);
+    hisvg_handle_destroy (handle);
 }
 
 // the window proc of status bar
@@ -525,11 +524,10 @@ static LRESULT StatusBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM 
             // load wifi icon
             for(int i = 0; i < 4; i++)
             {
-                button_color_pair[i].name = "color";
-                //button_color_pair[i].value = "#FA9C38";
-                button_color_pair[i].value = "#FFFFFF";
-                button_color_pair[i].important = 0;
+                //strcpy(button_color_style[i], "svg { color:#FA9C38; }");
+                strcpy(button_color_style[i], "svg { color:#FFFFFF; }");
             }
+
             loadSVGFromFile("res/wifi-0.svg", 0);
             loadSVGFromFile("res/wifi-1.svg", 1);
             loadSVGFromFile("res/wifi-2.svg", 2);

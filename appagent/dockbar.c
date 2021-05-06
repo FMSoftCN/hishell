@@ -74,12 +74,12 @@
 #include <minigui/control.h>
 #include <mgeff/mgeff.h>
 #include <glib.h>
-#include <librsvg/rsvg.h>
+#include <hisvg.h>
 
 #include "../include/sysconfig.h"
 #include "config.h"
 
-static RsvgStylePair button_color_pair [BUTTON_COUNT];
+static char button_color_style[BUTTON_COUNT][64];
 static char button_color[BUTTON_COUNT][32];
 static char button_target[BUTTON_COUNT][MAX_TARGET_NAME_LEN];
 static char target_name[MAX_TARGET_NUMBER][MAX_TARGET_NAME_LEN];
@@ -97,7 +97,7 @@ static int m_direction = DIRECTION_SHOW;        // the direction of animation
 static float m_factor = 0;                      // DPI / 96
 static RECT m_rect[BUTTON_COUNT];               // area for BUTTON
 static float m_Arrow_angle = 0;                 // angle of arrow button
-static RsvgHandle * m_arrow_svg_handle = NULL;  // svg handle for arrow file
+static HiSVGHandle * m_arrow_svg_handle = NULL;  // svg handle for arrow file
 
 static int m_DockBar_Start_x = 0;               // it is only for convenience for animation
 static int m_DockBar_Start_y = 0;
@@ -202,7 +202,6 @@ static HDC create_memdc_from_image_surface (cairo_surface_t* image_surface)
 static void paintSVGArrow(HDC hdc)
 {
     GError *error = NULL;
-    RsvgDimensionData dimensions;
     double factor_width = 0.0f;
     double factor_height = 0.0f;
 
@@ -213,7 +212,6 @@ static void paintSVGArrow(HDC hdc)
         cr[0] = NULL;
         return;
     }
-    rsvg_handle_get_dimensions(m_arrow_svg_handle, &dimensions);
 
     // create cairo_surface_t and cairo_t for one picture
     surface[0] = cairo_image_surface_create (CAIRO_FORMAT_RGB24, (int)(DOCK_ICON_WIDTH * m_factor), (int)(DOCK_ICON_HEIGHT * m_factor));
@@ -225,10 +223,11 @@ static void paintSVGArrow(HDC hdc)
     cairo_rotate(cr[0], m_Arrow_angle);
     cairo_translate(cr[0], (int)(-1 * DOCK_ICON_WIDTH * m_factor / 2), (int)(-1 * DOCK_ICON_HEIGHT * m_factor / 2));
 
-    factor_width = (double)DOCK_ICON_WIDTH / (double)dimensions.width;
-    factor_height = (double)DOCK_ICON_HEIGHT / (double)dimensions.height;
-    factor_width = (factor_width > factor_height) ? factor_width : factor_height;
-    cairo_scale(cr[0], factor_width, factor_width);
+    HiSVGRect vbox;
+    vbox.x = 0;
+    vbox.y = 0;
+    vbox.width = DOCK_ICON_WIDTH;
+    vbox.height = DOCK_ICON_HEIGHT;
 
     float r = SysPixelColor[IDX_COLOR_darkgray].r / 255.0;
     float g = SysPixelColor[IDX_COLOR_darkgray].g / 255.0;
@@ -236,7 +235,8 @@ static void paintSVGArrow(HDC hdc)
     float alpha = 0xE0 / 255.0;
     cairo_set_source_rgb (cr[0],  r*alpha, g*alpha, b*alpha);
     cairo_paint (cr[0]);
-    rsvg_handle_render_cairo_style (m_arrow_svg_handle, cr[0], &button_color_pair[0], 1);
+    hisvg_handle_set_stylesheet (m_arrow_svg_handle, NULL, button_color_style[0], strlen(button_color_style[0]), NULL);
+    hisvg_handle_render_cairo (m_arrow_svg_handle, cr[0], &vbox, NULL, NULL);
 
     HDC csdc = create_memdc_from_image_surface(surface[0]);
     if (csdc != HDC_SCREEN && csdc != HDC_INVALID)
@@ -256,10 +256,9 @@ static void paintSVGArrow(HDC hdc)
 static void loadSVGArrow(const char* file, int index)
 {
     GError *error = NULL;
-    RsvgDimensionData dimensions;
 
     // read file from svg file
-    m_arrow_svg_handle = rsvg_handle_new_from_file(file, &error);
+    m_arrow_svg_handle = hisvg_handle_new_from_file(file, &error);
     if(error)
     {
         surface[0] = NULL;
@@ -272,21 +271,19 @@ static void loadSVGArrow(const char* file, int index)
 
 static void loadSVGFromFile(const char* file, int index)
 {
-    RsvgHandle *handle;
+    HiSVGHandle *handle;
     GError *error = NULL;
-    RsvgDimensionData dimensions;
     double factor_width = 0.0f;
     double factor_height = 0.0f;
 
     // read file from svg file
-    handle = rsvg_handle_new_from_file(file, &error);
+    handle = hisvg_handle_new_from_file(file, &error);
     if(error)
     {
         surface[index] = NULL;
         cr[index] = NULL;
         return;
     }
-    rsvg_handle_get_dimensions(handle, &dimensions);
 
     // create cairo_surface_t and cairo_t for one picture
     surface[index] = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, DOCK_ICON_WIDTH * m_factor, DOCK_ICON_HEIGHT * m_factor);
@@ -294,11 +291,11 @@ static void loadSVGFromFile(const char* file, int index)
 
     cairo_save(cr[index]);
 
-    factor_width = (double)DOCK_ICON_WIDTH / (double)dimensions.width;
-    factor_height = (double)DOCK_ICON_HEIGHT / (double)dimensions.height;
-    factor_width = (factor_width > factor_height) ? factor_width : factor_height;
-
-    cairo_scale(cr[index], factor_width, factor_width);
+    HiSVGRect vbox;
+    vbox.x = 0;
+    vbox.y = 0;
+    vbox.width = DOCK_ICON_WIDTH;
+    vbox.height = DOCK_ICON_HEIGHT;
 
     float r = SysPixelColor[IDX_COLOR_darkgray].r / 255.0;
     float g = SysPixelColor[IDX_COLOR_darkgray].g / 255.0;
@@ -306,10 +303,11 @@ static void loadSVGFromFile(const char* file, int index)
     float alpha = 0xE0 / 255.0;
     cairo_set_source_rgb (cr[index],  r*alpha, g*alpha, b*alpha);
     cairo_paint (cr[index]);
-    rsvg_handle_render_cairo_style (handle, cr[index], &button_color_pair[index], 1);
+    hisvg_handle_set_stylesheet (handle, NULL, button_color_style[index], strlen(button_color_style[index]), NULL);
+    hisvg_handle_render_cairo (handle, cr[index], &vbox, NULL, NULL);
     cairo_restore (cr[index]);
 
-    g_object_unref (handle);
+    hisvg_handle_destroy (handle);
 }
 
 static void paintDockBarIcon(HDC hdc)
@@ -463,9 +461,9 @@ static LRESULT DockBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                 memset(button_color[ID_DISPLAY_BUTTON], 0, 24);
                 if(GetValueFromEtcFile(config_path, "dock_icon0", "icon_color", button_color[ID_DISPLAY_BUTTON], 24) == ETC_OK)
                 {
-                    button_color_pair[ID_DISPLAY_BUTTON].name = "color";
-                    button_color_pair[ID_DISPLAY_BUTTON].value = button_color[ID_DISPLAY_BUTTON];
-                    button_color_pair[ID_DISPLAY_BUTTON].important = 0;
+                    strcpy(button_color_style[ID_DISPLAY_BUTTON], "svg { color:");
+                    strcat(button_color_style[ID_DISPLAY_BUTTON], button_color[ID_DISPLAY_BUTTON]);
+                    strcat(button_color_style[ID_DISPLAY_BUTTON], "; } ");
                     loadSVGArrow(picture_file, ID_DISPLAY_BUTTON);
                 }
                 GetValueFromEtcFile(config_path, "dock_icon0", "target", button_target[ID_DISPLAY_BUTTON], MAX_TARGET_NAME_LEN);
@@ -479,9 +477,9 @@ static LRESULT DockBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                 memset(button_color[ID_HOME_BUTTON], 0, 24);
                 if(GetValueFromEtcFile(config_path, "dock_icon1", "icon_color", button_color[ID_HOME_BUTTON], 24) == ETC_OK)
                 {
-                    button_color_pair[ID_HOME_BUTTON].name = "color";
-                    button_color_pair[ID_HOME_BUTTON].value = button_color[ID_HOME_BUTTON];
-                    button_color_pair[ID_HOME_BUTTON].important = 0;
+                    strcpy(button_color_style[ID_HOME_BUTTON], "svg { color:");
+                    strcat(button_color_style[ID_HOME_BUTTON], button_color[ID_HOME_BUTTON]);
+                    strcat(button_color_style[ID_HOME_BUTTON], "; } ");
                     loadSVGFromFile(picture_file, ID_HOME_BUTTON);
                 }
                 GetValueFromEtcFile(config_path, "dock_icon1", "target", button_target[ID_HOME_BUTTON], MAX_TARGET_NAME_LEN);
@@ -495,9 +493,9 @@ static LRESULT DockBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                 memset(button_color[ID_TOGGLE_BUTTON], 0, 24);
                 if(GetValueFromEtcFile(config_path, "dock_icon2", "icon_color", button_color[ID_TOGGLE_BUTTON], 24) == ETC_OK)
                 {
-                    button_color_pair[ID_TOGGLE_BUTTON].name = "color";
-                    button_color_pair[ID_TOGGLE_BUTTON].value = button_color[ID_TOGGLE_BUTTON];
-                    button_color_pair[ID_TOGGLE_BUTTON].important = 0;
+                    strcpy(button_color_style[ID_TOGGLE_BUTTON], "svg { color:");
+                    strcat(button_color_style[ID_TOGGLE_BUTTON], button_color[ID_TOGGLE_BUTTON]);
+                    strcat(button_color_style[ID_TOGGLE_BUTTON], "; } ");
                     loadSVGFromFile(picture_file, ID_TOGGLE_BUTTON);
                 }
                 GetValueFromEtcFile(config_path, "dock_icon2", "target", button_target[ID_TOGGLE_BUTTON], MAX_TARGET_NAME_LEN);
@@ -511,9 +509,9 @@ static LRESULT DockBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                 memset(button_color[ID_SETTING_BUTTON], 0, 24);
                 if(GetValueFromEtcFile(config_path, "dock_icon3", "icon_color", button_color[ID_SETTING_BUTTON], 24) == ETC_OK)
                 {
-                    button_color_pair[ID_SETTING_BUTTON].name = "color";
-                    button_color_pair[ID_SETTING_BUTTON].value = button_color[ID_SETTING_BUTTON];
-                    button_color_pair[ID_SETTING_BUTTON].important = 0;
+                    strcpy(button_color_style[ID_SETTING_BUTTON], "svg { color:");
+                    strcat(button_color_style[ID_SETTING_BUTTON], button_color[ID_SETTING_BUTTON]);
+                    strcat(button_color_style[ID_SETTING_BUTTON], "; } ");
                     loadSVGFromFile(picture_file, ID_SETTING_BUTTON);
                 }
                 GetValueFromEtcFile(config_path, "dock_icon3", "target", button_target[ID_SETTING_BUTTON], MAX_TARGET_NAME_LEN);
@@ -527,9 +525,9 @@ static LRESULT DockBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                 memset(button_color[ID_ABOUT_BUTTON], 0, 24);
                 if(GetValueFromEtcFile(config_path, "dock_icon4", "icon_color", button_color[ID_ABOUT_BUTTON], 24) == ETC_OK)
                 {
-                    button_color_pair[ID_ABOUT_BUTTON].name = "color";
-                    button_color_pair[ID_ABOUT_BUTTON].value = button_color[ID_ABOUT_BUTTON];
-                    button_color_pair[ID_ABOUT_BUTTON].important = 0;
+                    strcpy(button_color_style[ID_ABOUT_BUTTON], "svg { color:");
+                    strcat(button_color_style[ID_ABOUT_BUTTON], button_color[ID_ABOUT_BUTTON]);
+                    strcat(button_color_style[ID_ABOUT_BUTTON], "; } ");
                     loadSVGFromFile(picture_file, ID_ABOUT_BUTTON);
                 }
                 GetValueFromEtcFile(config_path, "dock_icon4", "target", button_target[ID_ABOUT_BUTTON], MAX_TARGET_NAME_LEN);
@@ -543,9 +541,9 @@ static LRESULT DockBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                 memset(button_color[ID_SHUTDOWN_BUTTON], 0, 24);
                 if(GetValueFromEtcFile(config_path, "dock_icon5", "icon_color", button_color[ID_SHUTDOWN_BUTTON], 24) == ETC_OK)
                 {
-                    button_color_pair[ID_SHUTDOWN_BUTTON].name = "color";
-                    button_color_pair[ID_SHUTDOWN_BUTTON].value = button_color[ID_SHUTDOWN_BUTTON];
-                    button_color_pair[ID_SHUTDOWN_BUTTON].important = 0;
+                    strcpy(button_color_style[ID_SHUTDOWN_BUTTON], "svg { color:");
+                    strcat(button_color_style[ID_SHUTDOWN_BUTTON], button_color[ID_SHUTDOWN_BUTTON]);
+                    strcat(button_color_style[ID_SHUTDOWN_BUTTON], "; } ");
                     loadSVGFromFile(picture_file, ID_SHUTDOWN_BUTTON);
                 }
                 GetValueFromEtcFile(config_path, "dock_icon5", "target", button_target[ID_SHUTDOWN_BUTTON], MAX_TARGET_NAME_LEN);
@@ -685,7 +683,7 @@ static LRESULT DockBarWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                 cairo_destroy(cr[i]);
             }
             if(m_arrow_svg_handle)
-                g_object_unref(m_arrow_svg_handle);
+                hisvg_handle_destroy (m_arrow_svg_handle);
 
             KillTimer (hWnd, ID_SHOW_TIMER);
             DestroyAllControls (hWnd);

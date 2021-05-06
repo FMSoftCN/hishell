@@ -72,7 +72,7 @@
 #include <minigui/window.h>
 #include <mgeff/mgeff.h>
 #include <glib.h>
-#include <librsvg/rsvg.h>
+#include <cairo.h>
 
 #include "../include/sysconfig.h"
 #include "config.h"
