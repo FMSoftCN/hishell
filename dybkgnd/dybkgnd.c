@@ -64,7 +64,7 @@
 
 #include <glib.h>
 
-#include "librsvg/rsvg.h"
+#include "hisvg.h"
 
 #include "../include/sysconfig.h"
 
@@ -263,53 +263,38 @@ static HDC create_memdc_from_image_surface (cairo_surface_t* image_surface)
 
 void loadSVG(const char* file)
 {
-    RsvgHandle *handle;
+    HiSVGHandle *handle;
     GError *error = NULL;
 
     cairo_t *cr;
     cairo_surface_t *surface_a;
-    RsvgDimensionData dimensions;
     
-    handle = rsvg_handle_new_from_file (file, &error);
-    rsvg_handle_get_dimensions (handle, &dimensions);
+    handle = hisvg_handle_new_from_file (file, &error);
 
-    int width = 100;// dimensions.width;
-    int height = 100; //dimensions.height;
+    int w = 100;
+    int h = 100;
+    HiSVGRect vbox;
+    vbox.x = 0;
+    vbox.y = 0;
+    vbox.width = w;
+    vbox.height = h;
+    char* css = "svg { color:red; }";
+    hisvg_handle_set_stylesheet (handle, NULL, css, strlen(css), NULL);
 
-    surface_a = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, width, height);
+    surface_a = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, w, h);
     cr = cairo_create (surface_a);
-    cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
-
-#if 1
-    cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
-    cairo_paint (cr);
-#endif
-
-    cairo_save(cr);
-    cairo_scale(cr, 5.0, 5.0);
-
-    cairo_push_group (cr);
-    rsvg_handle_render_cairo (handle, cr);
-    cairo_pattern_t *p = cairo_pop_group (cr);
-
-    cairo_set_source_rgb (cr, 1.0, 0.0, 0.0);
-    cairo_mask(cr, p);
-
-    cairo_restore (cr);
-
-    cairo_surface_type_t cst = cairo_surface_get_type (surface_a);
+    hisvg_handle_render_cairo (handle, cr, &vbox, NULL, NULL);
 
     HDC csdc = create_memdc_from_image_surface (surface_a);
     if (csdc != HDC_SCREEN && csdc != HDC_INVALID) {
-        BitBlt(csdc, 0, 0, width, height,  HDC_SCREEN, 100, 100, 0);
+        BitBlt(csdc, 0, 0, w, h,  HDC_SCREEN, 100, 100, 0);
     }
     DeleteMemDC (csdc);
     SyncUpdateDC (HDC_SCREEN);
 
     cairo_surface_destroy (surface_a);
-    cairo_pattern_destroy (p);
     cairo_destroy (cr);
-    g_object_unref (handle);
+    hisvg_handle_destroy (handle);
 }
 
 int MiniGUIMain (int argc, const char* argv[])
@@ -326,6 +311,7 @@ int MiniGUIMain (int argc, const char* argv[])
 
     mGEffInit();
     startAnimation(NULL);
+    loadSVG("res/home.svg");
 
     while (GetMessage (&msg, HWND_DESKTOP)) {
         if (msg.message == MSG_DYBKGND_DO_ANIMATION)
