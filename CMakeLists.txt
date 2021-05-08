@@ -3,8 +3,11 @@ cmake_minimum_required(VERSION 3.10)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 set(HYBRIDOS_ROOT_PATH "$ENV{HYBRIDOS_OUTPUT_ROOT}")
-INCLUDE_DIRECTORIES("${HYBRIDOS_ROOT_PATH}/include" "${HYBRIDOS_ROOT_PATH}/usr/include" "${HYBRIDOS_ROOT_PATH}/usr/local/include")
-LINK_DIRECTORIES("${HYBRIDOS_ROOT_PATH}/lib" "${HYBRIDOS_ROOT_PATH}/usr/lib" "${HYBRIDOS_ROOT_PATH}/usr/local/lib")
+set(ROOT_PATH "$ENV{ROOT_PATH}")
+set(ENV{PKG_CONFIG_PATH} "${ROOT_PATH}/usr/lib/pkgconfig:${ROOT_PATH}/usr/local/lib/pkgconfig:${HYBRIDOS_ROOT_PATH}/usr/local/lib/pkgconfig:${HYBRIDOS_ROOT_PATH}/lib/pkgconfig:${HYBRIDOS_ROOT_PATH}/share/pkgconfig")
+
+INCLUDE_DIRECTORIES("${ROOT_PATH}/usr/include" "${ROOT_PATH}/usr/local/include" "${HYBRIDOS_ROOT_PATH}/include" "${HYBRIDOS_ROOT_PATH}/usr/include" "${HYBRIDOS_ROOT_PATH}/usr/local/include")
+LINK_DIRECTORIES("${ROOT_PATH}/usr/lib" "${ROOT_PATH}/usr/local/lib" "${HYBRIDOS_ROOT_PATH}/lib" "${HYBRIDOS_ROOT_PATH}/usr/lib" "${HYBRIDOS_ROOT_PATH}/usr/local/lib")
 
 OPTION(PLATFORM_R818 "Compiled for platform R818" OFF)
 if(PLATFORM_R818)
@@ -22,23 +25,24 @@ find_package(MbedTLS REQUIRED)
 find_package(Securec REQUIRED)
 find_package(Jerryscript REQUIRED)
 find_package(HiAceJS REQUIRED)
-
 find_package(MiniGUI 5.0.2 REQUIRED)
 find_package(mGEff 1.5.0 REQUIRED)
 find_package(GLIB 2.0 REQUIRED)
+
 if(PLATFORM_PX30)
 else()
 find_package(Cairo REQUIRED)
 endif()
+
 find_package(HiSVG REQUIRED)
 find_package(LibSoup 2.54.0 REQUIRED)
-#find_package(HiWebKit REQUIRED)
+find_package(HiWebKit REQUIRED)
 
 set(MINIGUI_LIBRARIES ${MiniGUI_LIBRARIES})
 set(MINIGUI_INCLUDE_DIRS ${MiniGUI_INCLUDE_DIRS})
 
-#set(HIWEBKIT_INCLUDE_DIRS ${HiWebKit_INCLUDE_DIRS})
-#set(HIWEBKIT_LIBRARIES ${HiWebKit_LIBRARIES})
+set(HIWEBKIT_INCLUDE_DIRS ${HiWebKit_INCLUDE_DIRS})
+set(HIWEBKIT_LIBRARIES ${HiWebKit_LIBRARIES})
 
 set(MGEFF_LIBRARIES ${mGEff_LIBRARIES})
 set(MGEFF_INCLUDE_DIRS ${mGEff_INCLUDE_DIRS})

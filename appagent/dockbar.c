@@ -361,7 +361,7 @@ static void toggle_application(HWND hWnd)
     }
 }
 
-static void ace_run(const char* bundleName)
+static pid_t ace_run(const char* bundleName)
 {
     pid_t pid = 0;
     char buff [PATH_MAX + NAME_MAX + 1];

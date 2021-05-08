@@ -1035,7 +1035,7 @@ static void rebuild_wins_region (CompositorCtxt* ctxt)
 }
 
 static void calc_mainwin_pos (CompositorCtxt* ctxt, MG_Layer* layer,
-            DWORD zt_type, int first_for_type, CALCPOSINFO* info)
+            DWORD zt_type, int first_for_type, int cli, CALCPOSINFO* info)
 {
     /* give a default size first */
     if (IsRectEmpty (&info->rc)) {

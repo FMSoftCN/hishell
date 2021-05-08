@@ -271,7 +271,7 @@ static void decidePolicyForNewWindowAction(WKPageRef page, WKFrameRef frame, WKF
         sprintf(window_info[i].target_url, "%s", urlString.c_str());
     }
 
-    SendMessage(thisWindow.mainHwnd(), MSG_USER_NEW_VIEW, (WPARAM)i, NULL); 
+    SendMessage(thisWindow.mainHwnd(), MSG_USER_NEW_VIEW, (WPARAM)i, 0); 
     return;
 }
 

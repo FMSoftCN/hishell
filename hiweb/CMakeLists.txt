@@ -47,7 +47,7 @@ add_definitions(-DHBD_VERSION_MIN_REQUIRED=HBD_VERSION_1_0)
 add_definitions(-DBUILDING_HBD__=1 -DBUILDING_WITH_CMAKE=1)
 
 include_directories(${hiweb_INCLUDE_DIRECTORIES})
-include_directories(SYSTEM ${hiweb_SYSTEM_INCLUDE_DIRECTORIES})
+include_directories(${hiweb_SYSTEM_INCLUDE_DIRECTORIES})
 add_executable(hiweb ${hiweb_SOURCES})
 target_link_libraries(hiweb ${hiweb_LIBRARIES})
 
