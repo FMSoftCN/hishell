@@ -11,7 +11,7 @@ endif()
 message("==============================================================================  ${Cairo_INCLUDE_DIRS}")
 message("==============================================================================  ${HISVG_INCLUDE_DIRS}")
 
-target_link_libraries(mginit gobject-2.0 cairo)
+target_link_libraries(mginit gobject-2.0 hicairo)
 target_link_libraries(mginit ${MINIGUI_LIBRARIES} ${MGEFF_LIBRARIES} ${LIBRSVG_LIBRARIES} ${GLIB_LIBRARIES} ${HISVGLIBRARIES})
 
 if(CMAKE_COMPILER_IS_GNUCXX)

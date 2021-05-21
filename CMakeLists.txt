@@ -31,7 +31,7 @@ find_package(GLIB 2.0 REQUIRED)
 
 if(PLATFORM_PX30)
 else()
-find_package(Cairo REQUIRED)
+find_package(hiCairo REQUIRED)
 endif()
 
 find_package(HiSVG REQUIRED)
