@@ -35,7 +35,7 @@ set(hiweb_LIBRARIES
     icui18n
     icuuc
     icudata
-    cairo
+    hicairo
     ${GLIB_LIBRARIES}
     ${LIBSOUP_LIBRARIES}
 #    ${GSTREAMER_LIBRARIES}
