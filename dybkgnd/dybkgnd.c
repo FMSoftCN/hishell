@@ -311,7 +311,7 @@ int MiniGUIMain (int argc, const char* argv[])
 
     mGEffInit();
     startAnimation(NULL);
-    loadSVG("res/home.svg");
+    //loadSVG("res/home.svg");
 
     while (GetMessage (&msg, HWND_DESKTOP)) {
         if (msg.message == MSG_DYBKGND_DO_ANIMATION)
